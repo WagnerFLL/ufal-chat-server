@@ -3,21 +3,22 @@ import threading
 import sys
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-port = 1234
 
-uname = input("Enter user name::")
+uname = input("Enter user name: ")
 
-ip = input('Enter the IP Address::')
+ip = input('Enter the IP Address: ')
+
+port = int(input('Enter port number: '))
 
 s.connect((ip, port))
 s.send(uname.encode('ascii'))
 
-clientRunning = True
+client_running = True
 
 
 def receive_msg(sock):
     server_down = False
-    while clientRunning and (not server_down):
+    while client_running and (not server_down):
         try:
             msg = sock.recv(1024).decode('ascii')
             print(msg)
@@ -28,11 +29,11 @@ def receive_msg(sock):
 
 threading.Thread(target=receive_msg, args=(s,)).start()
 
-while clientRunning:
-    tempMsg = input()
-    msg = uname + '>>' + tempMsg
-    if '**quit' in msg:
+while client_running:
+    temp_msg = input()
+    msg = uname + '>>' + temp_msg
+    if '--quit' in msg:
         clientRunning = False
-        s.send('**quit'.encode('ascii'))
+        s.send('--quit'.encode('ascii'))
     else:
         s.send(msg.encode('ascii'))
