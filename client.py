@@ -1,60 +1,38 @@
-# chat_client.py
+import socket
+import threading
+import sys
 
-import sys, socket, select
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+port = 1234
 
+uname = input("Enter user name::")
 
-def chat_client():
-    if len(sys.argv) < 3:
-        print('Usage : python chat_client.py hostname port')
+ip = input('Enter the IP Address::')
 
-        sys.exit()
+s.connect((ip, port))
+s.send(uname.encode('ascii'))
 
-    host = sys.argv[1]
-    port = int(sys.argv[2])
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(2)
-
-    # connect to remote host
-    try:
-        s.connect((host, port))
-    except:
-        print('Unable to connect')
-
-        sys.exit()
-
-    print('Connected to remote host. You can start sending messages')
-
-    sys.stdout.write('[Me] ')
-    sys.stdout.flush()
-
-    while 1:
-        socket_list = [sys.stdin, s]
-
-        # Get the list sockets which are readable
-        read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
-
-        for sock in read_sockets:
-            if sock == s:
-                # incoming message from remote server, s
-                data = sock.recv(4096)
-                if not data:
-                    print('\nDisconnected from chat server')
-
-                    sys.exit()
-                else:
-                    # print data
-                    sys.stdout.write(data)
-                    sys.stdout.write('[Me] ')
-                    sys.stdout.flush()
-
-            else:
-                # user entered a message
-                msg = sys.stdin.readline()
-                s.send(msg)
-                sys.stdout.write('[Me] ')
-                sys.stdout.flush()
+clientRunning = True
 
 
-if __name__ == "__main__":
-    sys.exit(chat_client())
+def receive_msg(sock):
+    server_down = False
+    while clientRunning and (not server_down):
+        try:
+            msg = sock.recv(1024).decode('ascii')
+            print(msg)
+        except:
+            print('Server is Down. You are now Disconnected. Press enter to exit...')
+            server_down = True
+
+
+threading.Thread(target=receive_msg, args=(s,)).start()
+
+while clientRunning:
+    tempMsg = input()
+    msg = uname + '>>' + tempMsg
+    if '**quit' in msg:
+        clientRunning = False
+        s.send('**quit'.encode('ascii'))
+    else:
+        s.send(msg.encode('ascii'))
