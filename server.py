@@ -1,3 +1,4 @@
+import os
 import socket
 import threading
 
@@ -13,15 +14,12 @@ s.listen()
 print('Server Ready...')
 print('Ip Address of the Server::%s' % ip)
 
+if not os.path.exists('serverfile'):
+    os.makedirs('serverfile')
 
 def handle_client(client, uname):
     client_connected = True
     keys = clients.keys()
-    help = 'There are four commands in Messenger\n \
-    1: --chatlist => gives you the list of the people currently online\n \
-    2: --quit => To end your connection\n \
-    3: --broadcast => To broadcast your message to each and every person currently present online\n \
-    4: Add the name of the person in your message preceded by -- to send it to particular person'
 
     while client_connected:
         try:
@@ -34,8 +32,36 @@ def handle_client(client, uname):
                     client_no += 1
                     response = response + str(client_no) + '::' + name + '\n'
                 client.send(response.encode('ascii'))
-            elif '--help' in msg:
-                client.send(help.encode('ascii'))
+
+            elif '--file' in msg:
+                input_file = msg.replace('--file', 'serverfile/')
+
+                with open(input_file, 'wb') as file_to_write:
+                    while True:
+                        data = client.recv(1024)
+                        if 'ACABOU' in str(data):
+                            print("Download finalizado.")
+                            break
+                        file_to_write.write(data)
+                    file_to_write.close()
+
+                destinator = client.recv(1024).decode('ascii')
+                print(destinator)
+
+                for name in keys:
+                    if name == destinator:
+                        clients.get(name).send('Recebendo arquivo...'.encode('ascii'))
+                        clients.get(name).send(input_file[11:].encode('ascii'))
+                        with open(input_file, 'rb') as file_to_send:
+                            for data in file_to_send:
+                                clients.get(name).sendall(data)
+
+                        clients.get(name).send('ACABOU'.encode('ascii'))
+                        found = True
+
+                if not found:
+                    client.send('Trying to send message to invalid person.'.encode('ascii'))
+
             elif '--broadcast' in msg:
                 msg = msg.replace('**broadcast', '')
                 for k, v in clients.items():
@@ -54,9 +80,10 @@ def handle_client(client, uname):
                         found = True
                 if not found:
                     client.send('Trying to send message to invalid person.'.encode('ascii'))
-        except:
+        except Exception as e:
+            print(e)
             clients.pop(uname)
-            print(uname + ' has been logged out')
+            print(uname + ' has been logged out with except')
             client_connected = False
 
 
