@@ -10,11 +10,14 @@ class bcolors:
 
 
 class strings:
-    help = '\033[93m' + 'Comandos para o chat:\n \
-    1: --chatlist => lista todos os usuários ativos\n \
-    2: --quit => Sai da aplicação\n \
-    3: --broadcast => Envia mensagem para todos que estiverem online\n \
-    4: --UserName para enviar uma mensagem privada' + '\033[0m'
+    help = 'Preencha o segundo campo com $ \
+    um desses comandos: $ \
+    [chatlist] lista todos os usuários ativos $ \
+    [quit] Sai da aplicação $ \
+    [broadcast] Envia mensagem para todos $ \
+    [file UserName] envia arquivo $ \
+    [UserName] para enviar uma mensagem privada '
+
     finish = 'ACABOU'
     input_path = bcolors.OKBLUE + bcolors.BOLD + 'Digite o caminho para o arquivo: ' + bcolors.ENDC
     input_dest = bcolors.OKBLUE + bcolors.BOLD + 'Destinatário: ' + bcolors.ENDC
@@ -26,7 +29,7 @@ class strings:
     server_down = bcolors.OKBLUE + bcolors.BOLD + "Houve um problema no servidor e voce foi desconectado." + bcolors.ENDC
     cmd = 'COMAND'
     recv_msg_cmd = 'Recebendo arquivo...'
-    online = cmd + 'Usuarios online:\n'
+    online = 'Usuarios online:$'
     dir_server = 'serverfile'
     invalid_dest = cmd + 'Destinatario invalido'
     exit = cmd + 'Saindo...'

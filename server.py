@@ -18,6 +18,7 @@ print('Use ::%s para se conectar.' % ip)
 if not os.path.exists(text.dir_server):
     os.makedirs(text.dir_server)
 
+
 def handle_client(client, uname):
     client_connected = True
     keys = clients.keys()
@@ -27,11 +28,12 @@ def handle_client(client, uname):
             msg = client.recv(1024).decode('ascii')
             response = text.online
             found = False
+
             if '--chatlist' in msg:
                 client_no = 0
                 for name in keys:
                     client_no += 1
-                    response = response + str(client_no) + '::' + name + '\n'
+                    response = response + str(client_no) + ' ' + name + ' $'
                 client.send(response.encode('ascii'))
 
             elif '--file' in msg:
@@ -46,7 +48,7 @@ def handle_client(client, uname):
                         file_to_write.write(data)
                     file_to_write.close()
 
-                destinator = client.recv(1024).decode('ascii')
+                destinator = str(data)[str(data).rfind('ACABOU')+6:-1]
                 print(destinator)
 
                 for name in keys:
@@ -84,10 +86,11 @@ def handle_client(client, uname):
                         found = True
                 if not found:
                     client.send(text.invalid_dest.encode('ascii'))
+
         except Exception as e:
             clients.pop(uname)
             print(uname + ' foi desconectado, causa: ', end='')
-            print(e.with_traceback())
+            print(e)
             client_connected = False
 
 
